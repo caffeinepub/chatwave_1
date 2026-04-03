@@ -112,6 +112,7 @@ export const idlService = IDL.Service({
       [Message],
       [],
     ),
+  'selfRegisterAsUser' : IDL.Func([], [], []),
   'unblockUser' : IDL.Func([IDL.Principal], [], []),
 });
 
@@ -226,6 +227,7 @@ export const idlFactory = ({ IDL }) => {
         [Message],
         [],
       ),
+    'selfRegisterAsUser' : IDL.Func([], [], []),
     'unblockUser' : IDL.Func([IDL.Principal], [], []),
   });
 };

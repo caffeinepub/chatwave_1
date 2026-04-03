@@ -1,10 +1,11 @@
 import { Toaster } from "@/components/ui/sonner";
 import type { Principal } from "@icp-sdk/core/principal";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Profile } from "./backend";
 import { BottomNav } from "./components/BottomNav";
 import type { Tab } from "./components/BottomNav";
+import { LoadingScreen } from "./components/LoadingScreen";
 import { useActor } from "./hooks/useActor";
 import { useInternetIdentity } from "./hooks/useInternetIdentity";
 import { AuthScreen } from "./screens/AuthScreen";
@@ -26,6 +27,8 @@ type Screen =
   | { name: "profile" }
   | { name: "settings" };
 
+const LOAD_TIMEOUT_MS = 15000;
+
 export default function App() {
   const { identity, isInitializing } = useInternetIdentity();
   const { actor, isFetching: actorFetching } = useActor();
@@ -33,33 +36,76 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>({ name: "auth" });
   const [activeTab, setActiveTab] = useState<Tab>("chats");
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const profileFetchedRef = useRef(false);
 
-  // Apply dark mode on mount
   useEffect(() => {
     const theme = localStorage.getItem("chatwave-theme") || "dark";
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, []);
 
-  // Load profile after identity + actor ready
   useEffect(() => {
+    // Only run when we have both identity and a ready actor
     if (!identity || !actor || actorFetching) return;
-    actor
-      .getOwnProfile()
-      .then((p) => {
-        setProfileLoaded(true);
-        if (p.displayName) {
-          setScreen({ name: "chats" });
-        } else {
-          setScreen({ name: "onboarding" });
-        }
-      })
-      .catch(() => {
+    // Don't fetch again if already fetched
+    if (profileFetchedRef.current) return;
+    profileFetchedRef.current = true;
+
+    let cancelled = false;
+
+    // Hard timeout: if backend hangs, still let the user in
+    const timeoutId = setTimeout(() => {
+      if (!cancelled) {
         setProfileLoaded(true);
         setScreen({ name: "onboarding" });
-      });
+      }
+    }, LOAD_TIMEOUT_MS);
+
+    const loadProfile = async () => {
+      // Step 1: Register the user (idempotent - safe to call every time)
+      // This ensures they have a #user role before any query
+      try {
+        await actor.selfRegisterAsUser();
+      } catch {
+        // If this fails (e.g. already registered), that's fine
+      }
+
+      if (cancelled) return;
+
+      // Step 2: Fetch profile (safe now -- user has a role)
+      const p = await actor.getCallerUserProfile();
+
+      if (cancelled) return;
+      clearTimeout(timeoutId);
+      setProfileLoaded(true);
+      if (p?.displayName) {
+        setScreen({ name: "chats" });
+      } else {
+        setScreen({ name: "onboarding" });
+      }
+    };
+
+    loadProfile().catch(() => {
+      if (cancelled) return;
+      clearTimeout(timeoutId);
+      setProfileLoaded(true);
+      setScreen({ name: "onboarding" });
+    });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [identity, actor, actorFetching]);
 
-  // Navigate when user changes tabs
+  // If identity is lost (logout), reset state
+  useEffect(() => {
+    if (!identity) {
+      profileFetchedRef.current = false;
+      setProfileLoaded(false);
+      setScreen({ name: "auth" });
+    }
+  }, [identity]);
+
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
     setScreen({ name: tab } as Screen);
@@ -68,7 +114,6 @@ export default function App() {
   const mainTabs: Tab[] = ["chats", "calls", "contacts", "profile"];
   const isMainScreen = mainTabs.includes(screen.name as Tab);
 
-  // Auth state
   if (isInitializing) {
     return (
       <div
@@ -99,24 +144,7 @@ export default function App() {
   }
 
   if (!profileLoaded) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: "var(--chat-bg)" }}
-      >
-        <div className="flex flex-col items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-full border-2 border-t-transparent"
-            style={{
-              borderColor: "var(--chat-accent)",
-              borderTopColor: "transparent",
-              animation: "spin 0.8s linear infinite",
-            }}
-          />
-          <p className="gradient-text text-sm font-semibold">Setting up...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (screen.name === "onboarding") {
@@ -143,7 +171,6 @@ export default function App() {
         className="relative w-full max-w-[430px] min-h-screen flex flex-col"
         style={{ background: "var(--chat-bg)" }}
       >
-        {/* Main content */}
         <main className="flex-1 pb-16 overflow-hidden flex flex-col">
           <AnimatePresence mode="wait">
             <motion.div
@@ -207,7 +234,6 @@ export default function App() {
           </AnimatePresence>
         </main>
 
-        {/* Bottom nav - only on main screens */}
         {isMainScreen && (
           <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
         )}

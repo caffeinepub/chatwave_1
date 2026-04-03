@@ -1,44 +1,28 @@
-# ChatWave — Vibrant UI & Liquid Animations Enhancement
+# ChatWave
 
 ## Current State
-- Working mobile-first messaging app (ChatWave) with Internet Identity login
-- Dark/light theme support via CSS custom properties
-- Flat, minimal green-on-dark color scheme (#25d366 accent, near-black backgrounds)
-- ChatsScreen: conversation list, new chat dialog, search
-- ContactsScreen: list of all users, invite button
-- ConversationScreen: messages with basic motion/react entry animation
-- BottomNav: 4 tabs (chats, calls, contacts, profile)
-- index.css uses OKLCH tokens for shadcn/ui
+- Chats tab has a "+" button that opens a dialog requiring the user to enter a full Principal ID to start a new chat
+- The Contacts tab lists all registered users but the "Chat" button shows a toast saying to go to the Chats tab and enter their Principal ID -- it does not actually open a conversation
+- Conversations in ChatsScreen are derived from call history, not from a dedicated contacts/connections list
+- Internet Identity handles session persistence already (remembers login across browser sessions)
 
 ## Requested Changes (Diff)
 
 ### Add
-- Liquid/fluid CSS animations: animated gradient blobs in backgrounds (SVG filter or CSS keyframe morphing shapes), wave-like transitions between screens, ripple on message send
-- Rich color palette: vibrant purple-to-cyan gradient accent system, multi-stop gradients for sent bubbles, iridescent/holographic header gradients
-- Floating action button with liquid press animation (scale + ripple effect)
-- Message bubble entrance with spring physics feel (bounce in from correct side)
-- Contacts quick-access inside ChatsScreen header (avatar strip of recent contacts above conversation list)
-- Send button with liquid "pulse" animation on active state
-- Animated gradient bottom nav bar with active tab liquid indicator
-- Animated avatar ring (pulsing gradient halo) on active/online users in contacts list
-- Smooth screen-level transitions (fade+slide) using motion/react
+- Username/display name search in the "New Chat" dialog (instead of only accepting a raw Principal ID)
+- When user types in the New Chat dialog, search all registered profiles by display name and show a dropdown of matches
+- Allow user to select a contact from search results to start a chat immediately
 
 ### Modify
-- index.css: Replace flat green tokens with rich gradient system; add --chat-sent-start/end gradient vars; add liquid animation keyframes (blob morph, ripple, wave); keep OKLCH semantic tokens compatible
-- ChatsScreen: Add recent contacts horizontal scroll strip at top; enhance empty state with animated gradient blob; header gradient background
-- ContactsScreen: Add animated ring on avatar for online users; Chat button with gradient and hover liquid animation; header with gradient
-- ConversationScreen: Sent bubbles use gradient fill; message entry animation with spring bounce; send button with liquid ripple effect; background subtle animated pattern
-- BottomNav: Animated liquid active indicator pill; gradient icons for active tab
-- App.tsx: Wrap screen transitions in motion/react AnimatePresence with slide+fade
+- ContactsScreen: "Chat" button for each contact should directly call `onOpenConversation` with that contact's profile/principal, instead of showing a toast
+- ChatsScreen conversations list: after user connects with someone via the contacts tab, that conversation should appear in the chats list
+- ChatsScreen conversations: also pull from messages history (not just call history) so any chat started via contacts or new chat shows up
 
 ### Remove
-- Flat solid color header backgrounds (replace with gradient versions)
-- Static green-only accent (replace with gradient accent system)
+- The toast in ContactsScreen that says "To chat, enter their Principal ID in Chats > New Chat" -- replace with direct chat opening
 
 ## Implementation Plan
-1. Update `index.css` — add gradient CSS vars, liquid animation keyframes (blob, ripple, wave), animated background pattern utility classes
-2. Update `ChatsScreen.tsx` — add contacts horizontal strip (using call history principals), gradient header, animated FAB, enhanced empty state
-3. Update `ContactsScreen.tsx` — gradient header, animated avatar rings, gradient chat button with ripple
-4. Update `ConversationScreen.tsx` — gradient sent bubbles, spring message animations, liquid send button ripple, subtle animated background
-5. Update `BottomNav.tsx` — liquid active indicator, gradient active icons
-6. Update `App.tsx` — screen-level AnimatePresence transitions
+1. Fix ContactsScreen: pass `onOpenConversation` properly (it's already in props but the Chat button isn't using it) and wire the Chat button to call it directly with the contact's principal and profile
+2. Fix ChatsScreen: the `getUserProfile` call uses the principal from call history, but contacts discovered via ContactsScreen don't have principals stored. Need to also fetch from messages to discover chat partners.
+3. Update New Chat dialog in ChatsScreen to support display name search: call `actor.getAllProfiles()` to get all profiles, then filter by display name as user types, show selectable list below the input, and when selected, open the conversation
+4. Keep Principal ID entry as a fallback in the New Chat dialog for power users

@@ -158,6 +158,7 @@ export interface backendInterface {
     registerOrUpdateProfile(displayName: string, avatarUrl: ExternalBlob, bio: string): Promise<Profile>;
     saveCallerUserProfile(profile: Profile): Promise<void>;
     sendMessage(receiver: Principal, content: string, mediaUrl: ExternalBlob): Promise<Message>;
+    selfRegisterAsUser(): Promise<void>;
     unblockUser(userToUnblock: Principal): Promise<void>;
 }
 import type { CallRecord as _CallRecord, ExternalBlob as _ExternalBlob, Message as _Message, Profile as _Profile, UserRole as _UserRole, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
@@ -510,6 +511,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.unblockUser(arg0);
+            return result;
+        }
+    }
+    async selfRegisterAsUser(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.selfRegisterAsUser();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.selfRegisterAsUser();
             return result;
         }
     }

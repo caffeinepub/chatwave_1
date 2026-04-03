@@ -67,6 +67,27 @@ actor {
   var messageId = 0;
   var callId = 0;
 
+  // Helper: check if caller has a role assigned
+  func hasRole(caller : Principal) : Bool {
+    if (caller.isAnonymous()) { return false };
+    switch (accessControlState.userRoles.get(caller)) {
+      case (?_) { true };
+      case (null) { false };
+    };
+  };
+
+  // Self-registration: any non-anonymous user can call this to get a #user role.
+  // This is idempotent -- calling it multiple times is safe.
+  public shared ({ caller }) func selfRegisterAsUser() : async () {
+    if (caller.isAnonymous()) { return };
+    switch (accessControlState.userRoles.get(caller)) {
+      case (?_) { /* already registered, no-op */ };
+      case (null) {
+        accessControlState.userRoles.add(caller, #user);
+      };
+    };
+  };
+
   // Public query functions
   public query ({ caller }) func getProfile(user : Principal) : async Profile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
@@ -122,6 +143,10 @@ actor {
 
   // Public update functions
   public shared ({ caller }) func registerOrUpdateProfile(displayName : Text, avatarUrl : Storage.ExternalBlob, bio : Text) : async Profile {
+    // Auto-register as user if not already registered
+    if (not caller.isAnonymous() and not hasRole(caller)) {
+      accessControlState.userRoles.add(caller, #user);
+    };
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can register or update profiles");
     };
@@ -261,8 +286,10 @@ actor {
 
   // Required frontend interface functions
   public query ({ caller }) func getCallerUserProfile() : async ?Profile {
+    // Return null for unregistered users rather than trapping
+    if (not hasRole(caller)) { return null };
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view profiles");
+      return null;
     };
     profiles.get(caller);
   };
@@ -278,6 +305,10 @@ actor {
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : Profile) : async () {
+    // Auto-register as user if not already registered
+    if (not caller.isAnonymous() and not hasRole(caller)) {
+      accessControlState.userRoles.add(caller, #user);
+    };
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };

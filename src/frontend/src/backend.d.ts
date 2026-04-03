@@ -64,6 +64,7 @@ export interface backendInterface {
     markMessageSeen(msgId: bigint): Promise<void>;
     registerOrUpdateProfile(displayName: string, avatarUrl: ExternalBlob, bio: string): Promise<Profile>;
     saveCallerUserProfile(profile: Profile): Promise<void>;
+    selfRegisterAsUser(): Promise<void>;
     sendMessage(receiver: Principal, content: string, mediaUrl: ExternalBlob): Promise<Message>;
     unblockUser(userToUnblock: Principal): Promise<void>;
 }

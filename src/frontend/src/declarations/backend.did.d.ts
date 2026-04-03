@@ -90,6 +90,7 @@ export interface _SERVICE {
   >,
   'saveCallerUserProfile' : ActorMethod<[Profile], undefined>,
   'sendMessage' : ActorMethod<[Principal, string, ExternalBlob], Message>,
+  'selfRegisterAsUser' : ActorMethod<[], undefined>,
   'unblockUser' : ActorMethod<[Principal], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
