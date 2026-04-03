@@ -1,0 +1,309 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ChatWave Design Tokens */
+:root {
+  /* --- OKLCH Semantic tokens (shadcn/ui) --- */
+  --radius: 0.75rem;
+
+  /* Light mode base */
+  --background: 0.97 0.005 150;
+  --foreground: 0.15 0.02 150;
+  --card: 1 0 0;
+  --card-foreground: 0.15 0 0;
+  --popover: 1 0 0;
+  --popover-foreground: 0.15 0 0;
+  --primary: 0.56 0.16 152;
+  --primary-foreground: 1 0 0;
+  --secondary: 0.95 0.01 150;
+  --secondary-foreground: 0.2 0 0;
+  --muted: 0.94 0.01 150;
+  --muted-foreground: 0.5 0.01 150;
+  --accent: 0.56 0.16 152;
+  --accent-foreground: 1 0 0;
+  --destructive: 0.577 0.245 27.325;
+  --destructive-foreground: 0.985 0 0;
+  --border: 0.88 0.01 150;
+  --input: 0.88 0.01 150;
+  --ring: 0.56 0.16 152;
+  --chart-1: 0.56 0.16 152;
+  --chart-2: 0.6 0.118 184;
+  --chart-3: 0.398 0.07 227;
+  --chart-4: 0.828 0.189 84;
+  --chart-5: 0.769 0.188 70;
+  --sidebar: 0.985 0 0;
+  --sidebar-foreground: 0.145 0 0;
+  --sidebar-primary: 0.56 0.16 152;
+  --sidebar-primary-foreground: 1 0 0;
+  --sidebar-accent: 0.95 0.01 150;
+  --sidebar-accent-foreground: 0.2 0 0;
+  --sidebar-border: 0.88 0.01 150;
+  --sidebar-ring: 0.56 0.16 152;
+
+  /* ChatWave-specific (light) */
+  --chat-bg: #f8f9ff;
+  --chat-surface: #eef0f8;
+  --chat-nav: #ffffff;
+  --chat-sent: #7c3aed;
+  --chat-sent-start: #7c3aed;
+  --chat-sent-end: #06b6d4;
+  --chat-received: #e5e7f0;
+  --chat-accent: #7c3aed;
+  --chat-accent-2: #ec4899;
+  --chat-accent-3: #06b6d4;
+  --chat-glow: rgba(124, 58, 237, 0.15);
+}
+
+.dark {
+  /* Dark mode shadcn/ui tokens */
+  --background: 0.11 0.01 150;
+  --foreground: 0.96 0.01 150;
+  --card: 0.15 0.015 150;
+  --card-foreground: 0.96 0.01 150;
+  --popover: 0.18 0.015 150;
+  --popover-foreground: 0.96 0.01 150;
+  --primary: 0.56 0.16 152;
+  --primary-foreground: 0.1 0.01 150;
+  --secondary: 0.2 0.015 150;
+  --secondary-foreground: 0.96 0.01 150;
+  --muted: 0.2 0.015 150;
+  --muted-foreground: 0.6 0.01 150;
+  --accent: 0.56 0.16 152;
+  --accent-foreground: 0.1 0.01 150;
+  --destructive: 0.704 0.191 22.216;
+  --destructive-foreground: 0.985 0 0;
+  --border: 1 0 0 / 8%;
+  --input: 1 0 0 / 10%;
+  --ring: 0.56 0.16 152;
+  --chart-1: 0.56 0.16 152;
+  --chart-2: 0.696 0.17 162;
+  --chart-3: 0.769 0.188 70;
+  --chart-4: 0.627 0.265 303;
+  --chart-5: 0.645 0.246 16;
+  --sidebar: 0.15 0.015 150;
+  --sidebar-foreground: 0.96 0.01 150;
+  --sidebar-primary: 0.56 0.16 152;
+  --sidebar-primary-foreground: 0.1 0.01 150;
+  --sidebar-accent: 0.2 0.015 150;
+  --sidebar-accent-foreground: 0.96 0.01 150;
+  --sidebar-border: 1 0 0 / 8%;
+  --sidebar-ring: 0.56 0.16 152;
+
+  /* ChatWave-specific (dark) */
+  --chat-bg: #080c14;
+  --chat-surface: #111827;
+  --chat-nav: #0d1117;
+  --chat-sent: #7c3aed;
+  --chat-sent-start: #7c3aed;
+  --chat-sent-end: #06b6d4;
+  --chat-received: #1e2535;
+  --chat-accent: #7c3aed;
+  --chat-accent-2: #ec4899;
+  --chat-accent-3: #06b6d4;
+  --chat-glow: rgba(124, 58, 237, 0.35);
+}
+
+/* ===================== KEYFRAME ANIMATIONS ===================== */
+
+@keyframes blob-morph {
+  0%,
+  100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  25% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
+  50% {
+    border-radius: 50% 60% 40% 50% / 40% 30% 60% 50%;
+  }
+  75% {
+    border-radius: 40% 70% 60% 30% / 60% 40% 70% 30%;
+  }
+}
+
+@keyframes float-up {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(124, 58, 237, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===================== UTILITY CLASSES ===================== */
+
+.liquid-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.18);
+  transform: scale(0);
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity
+    0.35s;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.liquid-btn:active::after {
+  transform: scale(2.8);
+  opacity: 0;
+  transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #7c3aed, #ec4899, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.animated-gradient-bg {
+  background: linear-gradient(135deg, #7c3aed, #ec4899, #06b6d4, #7c3aed);
+  background-size: 300% 300%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+.glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+}
+
+.float-animation {
+  animation: float-up 3s ease-in-out infinite;
+}
+
+.blob-morph {
+  animation: blob-morph 8s ease-in-out infinite;
+}
+
+/* Gradient avatar ring */
+.avatar-gradient-ring {
+  background: linear-gradient(135deg, #7c3aed, #ec4899, #06b6d4);
+  padding: 2px;
+  border-radius: 50%;
+}
+
+/* Dot pattern background */
+.dot-pattern {
+  background-image: radial-gradient(
+    rgba(124, 58, 237, 0.06) 1px,
+    transparent 1px
+  );
+  background-size: 20px 20px;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+
+  /* Safe areas for mobile */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
+/* Chat bubble tails */
+@layer utilities {
+  .chat-sent {
+    background: linear-gradient(
+      135deg,
+      var(--chat-sent-start),
+      var(--chat-sent-end)
+    );
+    color: white;
+  }
+  .chat-received {
+    background: var(--chat-received);
+    color: white;
+  }
+}
